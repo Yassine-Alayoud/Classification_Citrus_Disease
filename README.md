@@ -30,7 +30,6 @@ L'application permet de diagnostiquer automatiquement l'état sanitaire des feui
 
 - 📸 Upload d'images de feuilles d'agrumes pour diagnostic automatique
 - 🧠 Prédiction avec score de confiance par classe
-- 🚨 Détection *out-of-distribution* (OOD) — identifie les images qui ne correspondent à aucune classe connue
 - 👨‍🔬 Dashboard expert pour valider/corriger les prédictions (`ValidationView`)
 - 🔐 Authentification JWT
 - 📊 Suivi des versions de modèles et des runs d'entraînement
@@ -138,4 +137,4 @@ Les modèles sont stockés dans `backend/models/`.
 
 ---
 
-*Projet développé dans le cadre du stage PFA chez Agridata Consulting.*
+*Projet développé dans le cadre du stage PFA chez Agridata Consulting, et il représente un travail individuel.*
