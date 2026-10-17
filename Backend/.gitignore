@@ -9,7 +9,7 @@ __pycache__/
 *.pyc
 .DS_Store
 Thumbs.db
-.ipynb_checkpoints/
+mlops/.ipynb_checkpoints/
 .env
 
 # ============================================================
