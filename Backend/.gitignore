@@ -1,0 +1,24 @@
+# ============================================================
+# ENVIRONNEMENT & SYSTÈME
+# ============================================================
+.git/
+.dvc/
+.venv/
+venv/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+.env
+
+# ============================================================
+# DOSSIERS TEMPORAIRES ET FICHIERS INTERMÉDIAIRES
+# ============================================================
+# Ignore les dossiers d'upload temporaires hors datasets versionnés
+uploads/datasets/*
+uploads/predictions/*
+models/best_densenet121.keras
+!uploads/datasets/.gitkeep
+!uploads/predictions/.gitkeep
+*.tmp
+*.log

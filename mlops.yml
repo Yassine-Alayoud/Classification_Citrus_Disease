@@ -1,0 +1,105 @@
+name: MLOps Pipeline - Kaggle Training
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 1er et 15 de chaque mois à 2h UTC — adapte selon ta fréquence de ré-entraînement
+    - cron: '0 2 1,15 * *'
+
+jobs:
+  train:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installer le CLI Kaggle
+        run: pip install kaggle
+
+      - name: Pousser le notebook d'entraînement sur Kaggle
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: kaggle kernels push -p mlops/train_mlflow
+
+      - name: Attendre la fin de l'entraînement
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          KERNEL="ML_Goat/citrus-train-mlflow"
+          echo "En attente du kernel : $KERNEL"
+
+          for i in $(seq 1 60); do
+            STATUS=$(kaggle kernels status "$KERNEL" | grep -oP '(?<=has status ")[^"]+')
+            echo "[$i/60] Statut actuel : $STATUS"
+
+            if [ "$STATUS" = "complete" ]; then
+              echo "✅ Entraînement terminé avec succès."
+              exit 0
+            fi
+
+            if [ "$STATUS" = "error" ]; then
+              echo "❌ Le kernel d'entraînement a échoué sur Kaggle."
+              exit 1
+            fi
+
+            sleep 60
+          done
+
+          echo "⏱️ Timeout : le kernel n'a pas terminé après 60 minutes."
+          exit 1
+
+  evaluate:
+    needs: train
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Installer le CLI Kaggle
+        run: pip install kaggle
+
+      - name: Pousser le notebook d'évaluation sur Kaggle
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: kaggle kernels push -p mlops/evaluate_mlflow
+
+      - name: Attendre la fin de l'évaluation
+        env:
+          KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+          KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+        run: |
+          KERNEL="ML_Goat/citrus-evaluate-mlflow"
+          echo "En attente du kernel : $KERNEL"
+
+          for i in $(seq 1 60); do
+            STATUS=$(kaggle kernels status "$KERNEL" | grep -oP '(?<=has status ")[^"]+')
+            echo "[$i/60] Statut actuel : $STATUS"
+
+            if [ "$STATUS" = "complete" ]; then
+              echo "✅ Évaluation terminée avec succès (promotion éventuelle incluse)."
+              exit 0
+            fi
+
+            if [ "$STATUS" = "error" ]; then
+              echo "❌ Le kernel d'évaluation a échoué sur Kaggle."
+              exit 1
+            fi
+
+            sleep 60
+          done
+
+          echo "⏱️ Timeout : le kernel n'a pas terminé après 60 minutes."
+          exit 1
